@@ -10,8 +10,7 @@ def get_password_strength(password):
     return strength
 
 
-def check_for_prohibition(password, strength):
-    prohibited = read_prohibited_set()
+def check_for_prohibition(password, strength, prohibited):
     for forbidden in prohibited:
         if password.lower() == forbidden.lower():
             return 1
@@ -20,19 +19,6 @@ def check_for_prohibition(password, strength):
         else:
             strength +=2
     return strength
-
-
-def read_prohibited_set():
-    data_set = []
-    if len(sys.argv) > 2:
-        try:
-            with open(sys.argv[2]) as data_file:
-                data_set = re.findall(r"[\w']+", data_file.read())
-        except UnicodeDecodeError:
-            raise Exception("Wrong file type!")
-    else:
-        raise Exception("Missing prohibited passwords file!")
-    return data_set
 
 
 def rate_case_sensitivity(password):
@@ -86,7 +72,19 @@ def rate_special_characters(password):
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-        rate = get_password_strength(sys.argv[1])
+        password = sys.argv[1]
+        rate = get_password_strength(password)
+        prohibited_set = []
+        if len(sys.argv) > 2:
+            try:
+                with open(sys.argv[2]) as data_file:
+                    prohibited_set = re.findall(r"[\w']+", data_file.read())
+            except UnicodeDecodeError:
+                raise Exception("Wrong file type!")
+        else:
+            raise Exception("Missing prohibited passwords file!")
+
+        check_for_prohibition(password, rate, prohibited_set)
     else:
         raise Exception("Empty password cannot be rated.")
 
